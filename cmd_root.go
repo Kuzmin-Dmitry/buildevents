@@ -12,7 +12,7 @@ import (
 
 func commandRoot(cfg *libhoney.Config, filename *string, ciProvider *string, serviceName *string) *cobra.Command {
 	root := &cobra.Command{
-		Version: Version,
+		Version: "1.0.0",
 		Use:     "buildevents",
 		Short:   "buildevents creates events for your CI builds",
 		Long: `
@@ -21,7 +21,6 @@ about your Continuous Integration builds.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			quiet, _ := cmd.Flags().GetBool("quiet")
 			if isClassic(cfg.APIKey) {
-				// if we're in classic mode, we want to behave the same as we always have
 				if cfg.Dataset == "" {
 					cfg.Dataset = "buildevents"
 				}
@@ -29,11 +28,8 @@ about your Continuous Integration builds.`,
 					fmt.Fprintf(os.Stderr, "WARN: classic mode ignores the service name parameter.\n")
 				}
 			} else {
-				// This is the non-classic behavior
 				if *serviceName != "" {
-					// service name was specified, so use it as the dataset
 					if cfg.Dataset != "" && !quiet {
-						// warn if we're going to ignore a specified dataset
 						fmt.Fprintf(os.Stderr, "WARN: service name was specified, dataset is ignored.\n")
 					}
 					trimmed := strings.TrimSpace(*serviceName)
@@ -42,9 +38,7 @@ about your Continuous Integration builds.`,
 					}
 					cfg.Dataset = trimmed
 				} else {
-					// service_name was not specified
 					if cfg.Dataset == "" {
-						// neither was specified, so just use the default
 						cfg.Dataset = "buildevents"
 					}
 				}
@@ -54,7 +48,6 @@ about your Continuous Integration builds.`,
 
 	root.PersistentFlags().StringVarP(&cfg.APIKey, "apikey", "k", "", "[env.BUILDEVENT_APIKEY] the Honeycomb authentication token")
 	if apikey, ok := os.LookupEnv("BUILDEVENT_APIKEY"); ok {
-		// https://github.com/spf13/viper/issues/461#issuecomment-366831834
 		root.PersistentFlags().Lookup("apikey").Value.Set(apikey)
 	}
 
@@ -106,4 +99,36 @@ about your Continuous Integration builds.`,
 	}
 
 	return root
+}
+
+// isClassic is a placeholder for the actual implementation of the function that determines if the API key is for classic mode
+func isClassic(apiKey string) bool {
+	// Placeholder logic for determining if classic mode
+	return strings.HasPrefix(apiKey, "classic_")
+}
+
+const (
+	Version                  = "1.0.0"
+	providerTravis           = "travis"
+	providerCircle           = "circleci"
+	providerGitLab           = "gitlab"
+	providerBuildkite        = "buildkite"
+	providerJenkinsX         = "jenkins-x"
+	providerGoogleCloudBuild = "google-cloud-build"
+	providerAzurePipelines   = "azure-pipelines"
+	providerGitHubActions    = "github-actions"
+	providerBitbucketPipelines = "bitbucket-pipelines"
+)
+
+func main() {
+	cfg := &libhoney.Config{}
+	filename := ""
+	ciProvider := ""
+	serviceName := ""
+
+	rootCmd := commandRoot(cfg, &filename, &ciProvider, &serviceName)
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
