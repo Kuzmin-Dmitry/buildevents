@@ -12,7 +12,7 @@ import (
 
 func commandRoot(cfg *libhoney.Config, filename *string, ciProvider *string, serviceName *string) *cobra.Command {
 	root := &cobra.Command{
-		Version: "1.0.0",
+		Version: Version,
 		Use:     "buildevents",
 		Short:   "buildevents creates events for your CI builds",
 		Long: `
