@@ -12,4 +12,4 @@ jobs:
         uses: "JensAstrup/ai-reviewer@v1.0.1"
         with:
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PR_REVIEW_GITHUB_TOKEN }}
